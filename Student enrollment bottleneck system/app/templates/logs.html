@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}System Logs - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-terminal"></i> System Logs</h1>
+    <p>Historical system performance metrics for ML training</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-terminal"></i> Performance Logs</h2>
+    </div>
+    <div class="card-body table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Log ID</th>
+                    <th>Time</th>
+                    <th>Requests</th>
+                    <th>Active Users</th>
+                    <th>CPU %</th>
+                    <th>Memory %</th>
+                    <th>Response (s)</th>
+                    <th>Load Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.log_id }}</td>
+                    <td>{{ log.log_time.strftime('%Y-%m-%d %H:%M') if log.log_time else '-' }}</td>
+                    <td>{{ log.request_count }}</td>
+                    <td>{{ log.active_users }}</td>
+                    <td>{{ log.cpu_usage }}%</td>
+                    <td>{{ log.memory_usage }}%</td>
+                    <td>{{ log.response_time }}s</td>
+                    <td>
+                        {% if log.load_class == 0 %}
+                            <span class="badge badge-normal">Normal</span>
+                        {% elif log.load_class == 1 %}
+                            <span class="badge badge-moderate">Moderate</span>
+                        {% else %}
+                            <span class="badge badge-bottleneck">Bottleneck</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_prev %}
+        <a href="{{ url_for('routes.logs', page=pagination.prev_num) }}">Previous</a>
+    {% endif %}
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if page_num %}
+            {% if page_num == pagination.page %}
+                <span class="current">{{ page_num }}</span>
+            {% else %}
+                <a href="{{ url_for('routes.logs', page=page_num) }}">{{ page_num }}</a>
+            {% endif %}
+        {% else %}
+            <span>...</span>
+        {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+        <a href="{{ url_for('routes.logs', page=pagination.next_num) }}">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

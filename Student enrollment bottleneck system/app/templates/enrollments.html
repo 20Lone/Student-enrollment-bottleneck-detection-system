@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Enrollments - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-journal-text"></i> Enrollments</h1>
+    <p>Student course registration records</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-journal-text"></i> Enrollment Records</h2>
+    </div>
+    <div class="card-body table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Status</th>
+                    <th>Enrollment Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enr in enrollments %}
+                <tr>
+                    <td>{{ enr.enrollment_id }}</td>
+                    <td>{{ enr.student.full_name if enr.student else '-' }}</td>
+                    <td>{{ enr.course.course_code if enr.course else '-' }} - {{ enr.course.course_title if enr.course else '' }}</td>
+                    <td>
+                        {% if enr.enrollment_status == 'Approved' %}
+                            <span class="badge badge-success">Approved</span>
+                        {% elif enr.enrollment_status == 'Pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% else %}
+                            <span class="badge badge-danger">Failed</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ enr.enrollment_time.strftime('%Y-%m-%d %H:%M') if enr.enrollment_time else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_prev %}
+        <a href="{{ url_for('routes.enrollments', page=pagination.prev_num) }}">Previous</a>
+    {% endif %}
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if page_num %}
+            {% if page_num == pagination.page %}
+                <span class="current">{{ page_num }}</span>
+            {% else %}
+                <a href="{{ url_for('routes.enrollments', page=page_num) }}">{{ page_num }}</a>
+            {% endif %}
+        {% else %}
+            <span>...</span>
+        {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+        <a href="{{ url_for('routes.enrollments', page=pagination.next_num) }}">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

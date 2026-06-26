@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Students - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-people"></i> Students</h1>
+    <p>Manage student records</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-people"></i> Student List</h2>
+        <a href="{{ url_for('routes.add_student') }}" class="btn btn-primary"><i class="bi bi-person-plus"></i> Add New Student</a>
+    </div>
+    <div class="card-body table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Level</th>
+                    <th>Phone</th>
+                    <th>Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.student_id }}</td>
+                    <td>{{ student.full_name }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.department or '-' }}</td>
+                    <td>{{ student.level or '-' }}</td>
+                    <td>{{ student.phone or '-' }}</td>
+                    <td>{{ student.created_at.strftime('%Y-%m-%d') if student.created_at else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_prev %}
+        <a href="{{ url_for('routes.students', page=pagination.prev_num) }}">Previous</a>
+    {% endif %}
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if page_num %}
+            {% if page_num == pagination.page %}
+                <span class="current">{{ page_num }}</span>
+            {% else %}
+                <a href="{{ url_for('routes.students', page=page_num) }}">{{ page_num }}</a>
+            {% endif %}
+        {% else %}
+            <span>...</span>
+        {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+        <a href="{{ url_for('routes.students', page=pagination.next_num) }}">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

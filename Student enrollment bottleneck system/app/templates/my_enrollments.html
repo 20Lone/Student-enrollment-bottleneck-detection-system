@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}My Enrollments - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-journal-check"></i> My Enrollments</h1>
+    <p>All your course registrations</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-journal-check"></i> Enrollment Records</h2>
+        <a href="{{ url_for('routes.enroll_new') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> New Enrollment</a>
+    </div>
+    <div class="card-body table-container">
+        {% if enrollments %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Course</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enr in enrollments %}
+                <tr>
+                    <td><strong>{{ enr.course.course_code if enr.course else '-' }}</strong></td>
+                    <td>{{ enr.course.course_title if enr.course else '' }}</td>
+                    <td>
+                        {% if enr.enrollment_status == 'Approved' %}
+                            <span class="badge badge-success">Approved</span>
+                        {% elif enr.enrollment_status == 'Pending' %}
+                            <a href="{{ url_for('routes.payment_new', enrollment_id=enr.enrollment_id) }}" class="badge badge-warning">Pay Now</a>
+                        {% else %}
+                            <span class="badge badge-danger">Failed</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ enr.enrollment_time.strftime('%Y-%m-%d %H:%M') if enr.enrollment_time else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--gray-500);">No enrollments yet. <a href="{{ url_for('routes.enroll_new') }}">Enroll in a course</a></p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

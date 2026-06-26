@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Payments - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-wallet2"></i> Payments</h1>
+    <p>Fee payment transactions and status</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-wallet2"></i> Payment Records</h2>
+    </div>
+    <div class="card-body table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Payment ID</th>
+                    <th>Student</th>
+                    <th>Amount (NGN)</th>
+                    <th>Status</th>
+                    <th>Payment Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td>{{ payment.payment_id }}</td>
+                    <td>{{ payment.student.full_name if payment.student else '-' }}</td>
+                    <td>{{ "{:,.2f}".format(payment.amount|float) }}</td>
+                    <td>
+                        {% if payment.payment_status == 'Successful' %}
+                            <span class="badge badge-success">Successful</span>
+                        {% elif payment.payment_status == 'Pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% else %}
+                            <span class="badge badge-danger">Failed</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ payment.payment_time.strftime('%Y-%m-%d %H:%M') if payment.payment_time else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_prev %}
+        <a href="{{ url_for('routes.payments', page=pagination.prev_num) }}">Previous</a>
+    {% endif %}
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if page_num %}
+            {% if page_num == pagination.page %}
+                <span class="current">{{ page_num }}</span>
+            {% else %}
+                <a href="{{ url_for('routes.payments', page=page_num) }}">{{ page_num }}</a>
+            {% endif %}
+        {% else %}
+            <span>...</span>
+        {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+        <a href="{{ url_for('routes.payments', page=pagination.next_num) }}">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

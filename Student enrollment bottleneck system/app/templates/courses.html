@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Courses - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-book"></i> Courses</h1>
+    <p>Available courses and enrollment capacity</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-book"></i> Course Catalog</h2>
+    </div>
+    <div class="card-body table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Course Code</th>
+                    <th>Course Title</th>
+                    <th>Max Capacity</th>
+                    <th>Enrolled</th>
+                    <th>Availability</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td><strong>{{ course.course_code }}</strong></td>
+                    <td>{{ course.course_title }}</td>
+                    <td>{{ course.max_capacity }}</td>
+                    <td>{{ course.enrolled_count }}</td>
+                    <td>
+                        {% set pct = (course.enrolled_count / course.max_capacity * 100) if course.max_capacity > 0 else 0 %}
+                        {% if pct >= 100 %}
+                            <span class="badge badge-danger">Full</span>
+                        {% elif pct >= 80 %}
+                            <span class="badge badge-warning">{{ pct|int }}% Full</span>
+                        {% else %}
+                            <span class="badge badge-success">{{ pct|int }}% Full</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Payment - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-credit-card"></i> Complete Payment</h1>
+    <p>Pay for enrollment in {{ course.course_code }} - {{ course.course_title }}</p>
+</div>
+
+<div class="payment-layout">
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="bi bi-credit-card"></i> Card Details</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('routes.payment_new', enrollment_id=enrollment.enrollment_id) }}" id="paymentForm">
+                <input type="hidden" name="enrollment_id" value="{{ enrollment.enrollment_id }}">
+
+                <div class="form-group">
+                    <label for="card_number">Card Number</label>
+                    <input type="text" id="card_number" name="card_number"
+                           placeholder="1234 5678 9012 3456"
+                           maxlength="19" required
+                           autocomplete="cc-number">
+                </div>
+
+                <div class="form-group">
+                    <label for="card_name">Cardholder Name</label>
+                    <input type="text" id="card_name" name="card_name"
+                           placeholder="JOHN DOE" required
+                           autocomplete="cc-name">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="card_expiry">Expiry Date</label>
+                        <input type="text" id="card_expiry" name="card_expiry"
+                               placeholder="MM/YY" maxlength="5" required
+                               autocomplete="cc-exp">
+                    </div>
+                    <div class="form-group">
+                        <label for="card_cvv">CVV</label>
+                        <input type="text" id="card_cvv" name="card_cvv"
+                               placeholder="123" maxlength="4" required
+                               autocomplete="cc-csc">
+                    </div>
+                </div>
+
+                <div id="cardStatus" class="card-status"></div>
+
+                <div style="display: flex; gap: 12px; margin-top: 12px;">
+                    <button type="submit" class="btn btn-primary" id="payBtn"><i class="bi bi-credit-card"></i> Pay NGN {{ "{:,.2f}".format(course.fee_amount|float) }}</button>
+                    <a href="{{ url_for('routes.enroll_new') }}" class="btn" style="background: var(--gray-200); color: var(--gray-700);"><i class="bi bi-arrow-left"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="bi bi-receipt"></i> Order Summary</h2>
+        </div>
+        <div class="card-body">
+            <div class="order-summary">
+                <div class="summary-row">
+                    <span>Course</span>
+                    <span>{{ course.course_code }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Title</span>
+                    <span>{{ course.course_title }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Student</span>
+                    <span>{{ session.get('user_name', '') }}</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>NGN {{ "{:,.2f}".format(course.fee_amount|float) }}</span>
+                </div>
+            </div>
+            <div class="payment-notice">
+                This is a simulated payment system. No real money will be charged.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+
+<style>
+.payment-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 20px;
+}
+.card-status { padding: 12px 16px; border-radius: var(--radius); font-size: 0.9rem; margin-top: 12px; display: none; font-weight: 500; }
+.card-status.valid { display: block; background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.card-status.invalid { display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.order-summary { margin-bottom: 16px; }
+.summary-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--gray-100); font-size: 0.9rem; }
+.summary-row.total { border-bottom: none; font-weight: 700; font-size: 1.1rem; padding-top: 12px; border-top: 2px solid var(--gray-200); }
+.payment-notice { font-size: 0.8rem; color: var(--gray-400); background: var(--gray-50); padding: 12px; border-radius: var(--radius); }
+</style>
+{% endblock %}

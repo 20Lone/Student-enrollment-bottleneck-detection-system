@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Enrollment System{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p>System overview and real-time bottleneck monitoring</p>
+</div>
+
+<!-- System Status Banner -->
+<div class="prediction-status status-{{ assessment.status_color }}">
+    <div class="status-title">{{ assessment.status }}</div>
+    <div class="status-desc">{{ assessment.recommendation }}</div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label"><i class="bi bi-people"></i> Students</div>
+        <div class="stat-value">{{ student_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label"><i class="bi bi-book"></i> Courses</div>
+        <div class="stat-value">{{ course_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label"><i class="bi bi-journal-text"></i> Enrollments</div>
+        <div class="stat-value">{{ enrollment_count }}</div>
+        <div class="stat-meta">{{ approved_enrollments }} approved</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label"><i class="bi bi-wallet2"></i> Payments</div>
+        <div class="stat-value">{{ payment_count }}</div>
+        <div class="stat-meta">{{ successful_payments }} successful</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label"><i class="bi bi-terminal"></i> System Logs</div>
+        <div class="stat-value">{{ log_count }}</div>
+        <div class="stat-meta">{{ bottleneck_logs }} bottlenecks</div>
+    </div>
+</div>
+
+<!-- Real-Time Forecast Chart -->
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-graph-up-arrow"></i> Real-Time System Load</h2>
+        <span class="live-indicator" id="liveIndicator"></span>
+    </div>
+    <div class="card-body">
+        <div style="position: relative; height: 300px;">
+            <canvas id="forecastChart"></canvas>
+        </div>
+        <div id="forecastLegend" class="forecast-legend">
+            <span class="legend-item"><span class="legend-line solid"></span> Actual (last 60 min)</span>
+            <span class="legend-item"><span class="legend-line dashed"></span> Forecast (next 60 min)</span>
+            <span class="legend-item"><span class="legend-dot bottleneck"></span> Predicted Bottleneck</span>
+            <span class="legend-item"><span class="legend-dot moderate"></span> Predicted Moderate</span>
+            <span class="legend-item"><span class="legend-line now-line"></span> Now</span>
+        </div>
+    </div>
+</div>
+
+<!-- Recent System Logs -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="bi bi-terminal"></i> Recent System Logs</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Users</th>
+                            <th>CPU%</th>
+                            <th>Resp(s)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in recent_logs %}
+                        <tr>
+                            <td>{{ log.log_time.strftime('%H:%M') if log.log_time else '-' }}</td>
+                            <td>{{ log.active_users }}</td>
+                            <td>{{ log.cpu_usage }}%</td>
+                            <td>{{ log.response_time }}s</td>
+                            <td>
+                                {% if log.load_class == 0 %}
+                                    <span class="badge badge-normal">Normal</span>
+                                {% elif log.load_class == 1 %}
+                                    <span class="badge badge-moderate">Moderate</span>
+                                {% else %}
+                                    <span class="badge badge-bottleneck">Bottleneck</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="bi bi-journal-text"></i> Recent Enrollments</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enr in recent_enrollments %}
+                        <tr>
+                            <td>{{ enr.student.full_name if enr.student else '-' }}</td>
+                            <td>{{ enr.course.course_code if enr.course else '-' }}</td>
+                            <td>
+                                {% if enr.enrollment_status == 'Approved' %}
+                                    <span class="badge badge-success">Approved</span>
+                                {% elif enr.enrollment_status == 'Pending' %}
+                                    <span class="badge badge-warning">Pending</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Failed</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ enr.enrollment_time.strftime('%Y-%m-%d %H:%M') if enr.enrollment_time else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.forecast-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+.legend-line {
+    width: 30px;
+    height: 3px;
+    display: inline-block;
+}
+.legend-line.solid { background: var(--primary); }
+.legend-line.dashed { background: var(--primary); opacity: 0.5; border-top: 3px dashed var(--primary); height: 0; }
+.legend-line.now-line { background: #ef4444; border-top: 2px dashed #ef4444; height: 0; }
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.legend-dot.bottleneck { background: rgba(220, 38, 38, 0.9); }
+.legend-dot.moderate { background: rgba(249, 115, 22, 0.9); }
+.live-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+</style>
+
+<script src="{{ url_for('static', filename='js/realtime.js') }}"></script>
+{% endblock %}

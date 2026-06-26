@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Welcome, {{ student.full_name }}</h1>
+    <p>{{ student.department }} - Level {{ student.level }}</p>
+</div>
+
+<!-- Traffic Light -->
+<div class="traffic-light-container">
+    <div class="traffic-light" data-status="{{ advice.status }}">
+        <div class="light red {% if advice.status != 'stop' %}off{% endif %}"></div>
+        <div class="light yellow {% if advice.status != 'wait' %}off{% endif %}"></div>
+        <div class="light green {% if advice.status != 'go' %}off{% endif %}"></div>
+    </div>
+    <div class="traffic-light-info">
+        <h2 class="advice-title">
+            {% if advice.status == 'go' %}System Ready
+            {% elif advice.status == 'wait' %}System Busy
+            {% else %}System Overloaded
+            {% endif %}
+        </h2>
+        <p class="advice-message">{{ advice.message }}</p>
+        <p class="advice-recommendation">{{ advice.recommendation }}</p>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label"><i class="bi bi-journal-text"></i> My Enrollments</div>
+        <div class="stat-value">{{ my_enrollments|length }}</div>
+        <div class="stat-meta">{{ approved_count }} approved</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label"><i class="bi bi-hourglass-split"></i> Pending</div>
+        <div class="stat-value">{{ pending_count }}</div>
+        <div class="stat-meta">Awaiting payment</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label"><i class="bi bi-wallet2"></i> My Payments</div>
+        <div class="stat-value">{{ my_payments|length }}</div>
+        <div class="stat-meta">Total transactions</div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-lightning"></i> Quick Actions</h2>
+    </div>
+    <div class="card-body">
+        <div class="quick-actions">
+            <a href="{{ url_for('routes.enroll_new') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Enroll in a Course</a>
+            <a href="{{ url_for('routes.my_enrollments') }}" class="btn" style="background: var(--gray-200); color: var(--gray-700);"><i class="bi bi-journal-check"></i> View My Enrollments</a>
+            <a href="{{ url_for('routes.my_payments') }}" class="btn" style="background: var(--gray-200); color: var(--gray-700);"><i class="bi bi-wallet2"></i> View My Payments</a>
+        </div>
+    </div>
+</div>
+
+<!-- My Recent Enrollments -->
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-journal-text"></i> My Recent Enrollments</h2>
+    </div>
+    <div class="card-body table-container">
+        {% if my_enrollments %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Course</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enr in my_enrollments %}
+                <tr>
+                    <td><strong>{{ enr.course.course_code if enr.course else '-' }}</strong> - {{ enr.course.course_title if enr.course else '' }}</td>
+                    <td>
+                        {% if enr.enrollment_status == 'Approved' %}
+                            <span class="badge badge-success">Approved</span>
+                        {% elif enr.enrollment_status == 'Pending' %}
+                            <a href="{{ url_for('routes.payment_new', enrollment_id=enr.enrollment_id) }}" class="badge badge-warning">Pay Now</a>
+                        {% else %}
+                            <span class="badge badge-danger">Failed</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ enr.enrollment_time.strftime('%Y-%m-%d %H:%M') if enr.enrollment_time else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--gray-500);">No enrollments yet. <a href="{{ url_for('routes.enroll_new') }}">Enroll in a course</a></p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- My Recent Payments -->
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-wallet2"></i> My Recent Payments</h2>
+    </div>
+    <div class="card-body table-container">
+        {% if my_payments %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in my_payments %}
+                <tr>
+                    <td>NGN {{ "{:,.2f}".format(payment.amount|float) }}</td>
+                    <td>
+                        {% if payment.payment_status == 'Successful' %}
+                            <span class="badge badge-success">Successful</span>
+                        {% elif payment.payment_status == 'Pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% else %}
+                            <span class="badge badge-danger">Failed</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ payment.payment_time.strftime('%Y-%m-%d %H:%M') if payment.payment_time else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--gray-500);">No payments yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.traffic-light-container {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    background: white;
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 24px;
+}
+.traffic-light {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    background: var(--gray-900);
+    border-radius: 12px;
+}
+.traffic-light .light {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+.traffic-light .light.red { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
+.traffic-light .light.yellow { background: #f59e0b; box-shadow: 0 0 12px #f59e0b; }
+.traffic-light .light.green { background: #22c55e; box-shadow: 0 0 12px #22c55e; }
+.traffic-light .light.off { background: var(--gray-700); box-shadow: none; }
+.advice-title { font-size: 1.5rem; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+.advice-message { color: var(--gray-600); margin-bottom: 4px; }
+.advice-recommendation { color: var(--primary); font-weight: 600; }
+.quick-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+</style>
+{% endblock %}

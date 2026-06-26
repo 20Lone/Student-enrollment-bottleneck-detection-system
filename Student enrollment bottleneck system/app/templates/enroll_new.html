@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Enroll in Course - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-plus-circle"></i> Enroll in a Course</h1>
+    <p>Select a course to register for</p>
+</div>
+
+<!-- Simple System Status -->
+{% if advice.status == 'go' %}
+<div class="advice-banner advice-go">
+    <i class="bi bi-check-circle-fill advice-icon"></i>
+    <div><strong>System Ready</strong> — {{ advice.message }}</div>
+</div>
+{% elif advice.status == 'wait' %}
+<div class="advice-banner advice-wait">
+    <i class="bi bi-exclamation-triangle-fill advice-icon"></i>
+    <div><strong>System Busy</strong> — {{ advice.message }}</div>
+</div>
+{% else %}
+<div class="advice-banner advice-stop">
+    <i class="bi bi-x-circle-fill advice-icon"></i>
+    <div><strong>System Overloaded</strong> — {{ advice.message }}</div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h2><i class="bi bi-book"></i> Available Courses</h2>
+    </div>
+    <div class="card-body">
+        {% if courses %}
+        <form method="POST" action="{{ url_for('routes.enroll_new') }}">
+            <div class="form-group">
+                <label for="course_id">Select Course</label>
+                <select id="course_id" name="course_id" required>
+                    <option value="">-- Choose a course --</option>
+                    {% for course in courses %}
+                    <option value="{{ course.course_id }}">
+                        {{ course.course_code }} - {{ course.course_title }}
+                        ({{ course.enrolled_count }}/{{ course.max_capacity }} seats filled)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Continue to Payment</button>
+        </form>
+        {% else %}
+        <p style="color: var(--gray-500);">No courses available for enrollment.</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.advice-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+.advice-go { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.advice-wait { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.advice-stop { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.advice-icon { font-size: 1.5rem; }
+</style>
+{% endblock %}

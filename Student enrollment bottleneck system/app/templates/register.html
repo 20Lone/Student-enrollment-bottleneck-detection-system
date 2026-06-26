@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h1><i class="bi bi-person-plus"></i> Create Account</h1>
+            <p>Register as a new student</p>
+        </div>
+        <form method="POST" action="{{ url_for('routes.register') }}">
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" name="phone" placeholder="Enter your phone number">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select id="department" name="department">
+                        <option value="">Select Department</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept }}">{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="level">Level</label>
+                    <select id="level" name="level">
+                        <option value="">Select Level</option>
+                        {% for lvl in levels %}
+                        <option value="{{ lvl }}">{{ lvl }} Level</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password (min 6 characters)" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required minlength="6">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block"><i class="bi bi-person-plus"></i> Create Account</button>
+        </form>
+        <div class="login-footer">
+            <p>Already have an account? <a href="{{ url_for('routes.login') }}"><i class="bi bi-box-arrow-in-right"></i> Sign In</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+.login-footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-200);
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--gray-500);
+}
+.login-footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+.login-footer a:hover {
+    text-decoration: underline;
+}
+</style>
+{% endblock %}

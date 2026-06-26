@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Enrollment System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard</h1>
+    <p>Overview of enrollment system metrics and recent activity</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Students</div>
+        <div class="stat-value">{{ student_count }}</div>
+        <div class="stat-meta">Registered in system</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Courses</div>
+        <div class="stat-value">{{ course_count }}</div>
+        <div class="stat-meta">Active offerings</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Enrollments</div>
+        <div class="stat-value">{{ enrollment_count }}</div>
+        <div class="stat-meta">{{ approved_enrollments }} approved</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Payments</div>
+        <div class="stat-value">{{ payment_count }}</div>
+        <div class="stat-meta">{{ successful_payments }} successful</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">System Logs</div>
+        <div class="stat-value">{{ log_count }}</div>
+        <div class="stat-meta">{{ bottleneck_logs }} bottlenecks detected</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="card">
+        <div class="card-header">
+            <h2>Recent System Logs</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Active Users</th>
+                            <th>CPU %</th>
+                            <th>Memory %</th>
+                            <th>Response (s)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in recent_logs %}
+                        <tr>
+                            <td>{{ log.log_time.strftime('%Y-%m-%d %H:%M') if log.log_time else '-' }}</td>
+                            <td>{{ log.active_users }}</td>
+                            <td>{{ log.cpu_usage }}%</td>
+                            <td>{{ log.memory_usage }}%</td>
+                            <td>{{ log.response_time }}s</td>
+                            <td>
+                                {% if log.load_class == 0 %}
+                                    <span class="badge badge-normal">Normal</span>
+                                {% elif log.load_class == 1 %}
+                                    <span class="badge badge-moderate">Moderate</span>
+                                {% else %}
+                                    <span class="badge badge-bottleneck">Bottleneck</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Recent Enrollments</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enr in recent_enrollments %}
+                        <tr>
+                            <td>{{ enr.student.full_name if enr.student else '-' }}</td>
+                            <td>{{ enr.course.course_code if enr.course else '-' }}</td>
+                            <td>
+                                {% if enr.enrollment_status == 'Approved' %}
+                                    <span class="badge badge-success">Approved</span>
+                                {% elif enr.enrollment_status == 'Pending' %}
+                                    <span class="badge badge-warning">Pending</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Failed</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ enr.enrollment_time.strftime('%Y-%m-%d %H:%M') if enr.enrollment_time else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
